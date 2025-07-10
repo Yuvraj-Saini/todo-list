@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Todo List</h1>
+            <p>Stay organized and get things done!</p>
+        </header>
+        
+        <main>
+            <form class="todo-form" id="todoForm">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todoInput" 
+                        placeholder="Add a new task..." 
+                        required
+                        aria-label="New todo item"
+                    >
+                    <button type="submit" class="add-btn" aria-label="Add todo item">
+                        <span>+</span>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="todo-stats">
+                <span id="todoCount">0 tasks remaining</span>
+            </div>
+            
+            <ul class="todo-list" id="todoList" role="list">
+            </ul>
+            
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📝</div>
+                <h3>No tasks yet</h3>
+                <p>Add a task above to get started!</p>
+            </div>
+        </main>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
