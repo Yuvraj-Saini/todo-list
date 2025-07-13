@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -19,7 +19,7 @@
                     <input 
                         type="text" 
                         id="todoInput" 
-                        placeholder="Add a new task..." 
+                        placeholder="What needs to be done?" 
                         required
                         aria-label="New todo item"
                     >
@@ -33,7 +33,21 @@
                 <span id="todoCount">0 tasks remaining</span>
             </div>
             
+            <div class="todo-management">
+              <button class="management-btn" id="clearAllBtn" title="Clear all tasks">
+                🗑️ Clear All
+              </button>
+              <button class="management-btn" id="exportBtn" title="Export tasks to file">
+                📥 Export
+              </button>
+              <input type="file" id="importFile" accept=".json" style="display: none;">
+              <button class="management-btn" id="importBtn" title="Import tasks from file">
+                📤 Import
+              </button>
+            </div>
+
             <ul class="todo-list" id="todoList" role="list">
+                <!-- Todo items will be dynamically added here -->
             </ul>
             
             <div class="empty-state" id="emptyState">
