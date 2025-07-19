@@ -3,16 +3,20 @@ class TodoApp {
     this.todos = []
     this.todoIdCounter = 1
 
+    // Get DOM elements
     this.todoForm = document.getElementById("todoForm")
     this.todoInput = document.getElementById("todoInput")
     this.todoList = document.getElementById("todoList")
     this.todoCount = document.getElementById("todoCount")
     this.emptyState = document.getElementById("emptyState")
 
+    // Bind event listeners
     this.bindEvents()
 
+    // Load todos from localStorage
     this.loadTodos()
 
+    // Initial render
     this.render()
   }
 
@@ -22,25 +26,11 @@ class TodoApp {
       this.addTodo()
     })
 
+    // Management buttons
     const clearAllBtn = document.getElementById("clearAllBtn")
-    const exportBtn = document.getElementById("exportBtn")
-    const importBtn = document.getElementById("importBtn")
-    const importFile = document.getElementById("importFile")
 
     if (clearAllBtn) {
       clearAllBtn.addEventListener("click", () => this.clearAllTodos())
-    }
-
-    if (exportBtn) {
-      exportBtn.addEventListener("click", () => this.exportTodos())
-    }
-
-    if (importBtn) {
-      importBtn.addEventListener("click", () => importFile.click())
-    }
-
-    if (importFile) {
-      importFile.addEventListener("change", (e) => this.importTodos(e))
     }
   }
 
@@ -64,6 +54,7 @@ class TodoApp {
     this.saveTodos()
     this.render()
 
+    // Add success feedback
     this.showSuccessMessage()
   }
 
@@ -124,6 +115,7 @@ class TodoApp {
             </button>
         `
 
+    // Add event listeners
     const checkbox = li.querySelector(".todo-checkbox")
     const deleteBtn = li.querySelector(".delete-btn")
 
@@ -152,6 +144,7 @@ class TodoApp {
       statsText = `${remainingTodos} of ${totalTodos} tasks remaining`
     }
 
+    // Add storage indicator
     const storageUsed = this.getStorageUsage()
     if (storageUsed > 0) {
       statsText += ` • ${storageUsed}KB stored`
@@ -195,6 +188,7 @@ class TodoApp {
 
   saveTodos() {
     try {
+      // Validate data before saving
       const dataToSave = {
         todos: this.todos,
         counter: this.todoIdCounter,
@@ -216,6 +210,7 @@ class TodoApp {
       if (savedData) {
         const parsedData = JSON.parse(savedData)
 
+        // Handle new format
         if (parsedData.todos && Array.isArray(parsedData.todos)) {
           this.todos = parsedData.todos.filter(
             (todo) => todo && typeof todo.id === "number" && typeof todo.text === "string",
@@ -223,9 +218,11 @@ class TodoApp {
           this.todoIdCounter = parsedData.counter || this.getNextId()
           console.log(`Loaded ${this.todos.length} todos from localStorage`)
         }
+        // Handle legacy format (backward compatibility)
         else if (Array.isArray(parsedData)) {
           this.todos = parsedData.filter((todo) => todo && typeof todo.id === "number" && typeof todo.text === "string")
           this.todoIdCounter = this.getNextId()
+          // Migrate to new format
           this.saveTodos()
         }
       }
@@ -284,28 +281,16 @@ class TodoApp {
     }
   }
 
-  exportTodos() {
-    const dataStr = JSON.stringify(this.todos, null, 2)
-    const dataBlob = new Blob([dataStr], { type: "application/json" })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `todos-${new Date().toISOString().split("T")[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-    this.showMessage("Tasks exported successfully!", "success")
-  }
-
   showMessage(message, type = "info") {
     const messageDiv = document.createElement("div")
     messageDiv.className = `message message-${type}`
     messageDiv.style.cssText = `
-      background: ${type === "success" ? "#d4edda" : "#d1ecf1"};
-      color: ${type === "success" ? "#155724" : "#0c5460"};
+      background: ${type === "success" ? "#d4edda" : type === "error" ? "#f8d7da" : "#d1ecf1"};
+      color: ${type === "success" ? "#155724" : type === "error" ? "#721c24" : "#0c5460"};
       padding: 12px 20px;
       border-radius: 8px;
       margin-bottom: 20px;
-      border: 1px solid ${type === "success" ? "#c3e6cb" : "#bee5eb"};
+      border: 1px solid ${type === "success" ? "#c3e6cb" : type === "error" ? "#f5c6cb" : "#bee5eb"};
       animation: slideIn 0.3s ease;
     `
     messageDiv.textContent = message
@@ -329,68 +314,16 @@ class TodoApp {
       return 0
     }
   }
-
-  importTodos(event) {
-    const file = event.target.files[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const importedTodos = JSON.parse(e.target.result)
-
-        if (Array.isArray(importedTodos)) {
-          const validTodos = importedTodos.filter(
-            (todo) => todo && typeof todo.id === "number" && typeof todo.text === "string",
-          )
-
-          if (validTodos.length > 0) {
-            // Ask user if they want to replace or merge
-            const replace = confirm(
-              `Import ${validTodos.length} tasks?\n\nOK = Replace current tasks\nCancel = Add to current tasks`,
-            )
-
-            if (replace) {
-              this.todos = validTodos
-            } else {
-              // Merge and reassign IDs to avoid conflicts
-              const maxId = this.todos.length > 0 ? Math.max(...this.todos.map((t) => t.id)) : 0
-              validTodos.forEach((todo, index) => {
-                todo.id = maxId + index + 1
-                this.todos.push(todo)
-              })
-            }
-
-            this.todoIdCounter = this.getNextId()
-            this.saveTodos()
-            this.render()
-            this.showMessage(`Successfully imported ${validTodos.length} tasks!`, "success")
-          } else {
-            this.showMessage("No valid tasks found in the file.", "error")
-          }
-        } else {
-          this.showMessage("Invalid file format. Please select a valid JSON file.", "error")
-        }
-      } catch (error) {
-        this.showMessage("Failed to import tasks. Please check the file format.", "error")
-      }
-
-      // Reset file input
-      event.target.value = ""
-    }
-
-    reader.readAsText(file)
-  }
 }
 
-
+// Initialize the app when the DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   new TodoApp()
 })
 
-
+// Add keyboard shortcuts
 document.addEventListener("keydown", (e) => {
-
+  // Focus input when pressing 'n' or '/'
   if ((e.key === "n" || e.key === "/") && !e.target.matches("input, textarea")) {
     e.preventDefault()
     document.getElementById("todoInput").focus()
